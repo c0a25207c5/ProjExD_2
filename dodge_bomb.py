@@ -1,3 +1,4 @@
+import time
 import os
 import random
 import sys
@@ -28,6 +29,40 @@ def check_bound(rect: pg.Rect) -> tuple[bool,bool]:
     return yoko, tate
 
 
+def gameovrer(screen: pg.Surface) -> None:
+    """
+    ゲームオーバー関数
+    引数：screen
+    戻り値：screenにゲームオーバー画像をbildした画像
+    五秒後に閉じる
+    """
+    go_img = pg.Surface((WIDTH,HEIGHT))  # ゲームオーバー背景のサーフェス
+    pg.draw.rect(go_img,(0,0,0),(0,0,1600,900))
+    go_img.set_alpha(100)
+
+    go_font = pg.font.Font(None,80)  # 文字の作成
+    go_txt = go_font.render("Game Over",True, (255,255,255))
+    txt_rct = go_txt.get_rect()
+    txt_rct.center = WIDTH/2,HEIGHT/2
+    go_img.blit(go_txt,txt_rct)
+
+    kk2_img = pg.image.load("fig/8.png")  # こうかとんの画像作成
+    kk2_rct1 = kk2_img.get_rect()  # こうかとんをゲームオーバー画像へ貼り付け（1匹目）
+    kk2_rct1.center = WIDTH/2+200,HEIGHT/2
+    go_img.blit(kk2_img,kk2_rct1)
+
+    kk2_rct2 = kk2_img.get_rect()# こうかとんをゲームオーバー画像へ貼り付け（2匹目）
+    kk2_rct2.center = WIDTH/2-200,HEIGHT/2
+    go_img.blit(kk2_img,kk2_rct2)
+
+    go_rct = go_img.get_rect()
+    go_rct.center = WIDTH/2,HEIGHT/2
+    screen.blit(go_img,go_rct)
+    
+    pg.display.update()
+    time.sleep(5)
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -50,6 +85,7 @@ def main():
         screen.blit(bg_img, [0, 0]) 
 
         if kk_rct.colliderect(bb_rct):  # kkとbbのRectが重なっていたら
+            gameovrer(screen)
             print("game over")
             return
 
