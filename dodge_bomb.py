@@ -63,6 +63,23 @@ def gameovrer(screen: pg.Surface) -> None:
     time.sleep(5)
 
 
+def init_bb_imgs() -> tuple[list[pg.Surface],list[int]]:
+    """
+    爆弾を拡大、加速させる関数
+    引数：なし
+    戻り値：１０段階の拡大するタプルと加速するタプル
+    """
+    bb_imgs = []
+    for r in range(1,11):  # 大きさリストの作成
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255,0,0), (10*r,10*r), 10*r)
+        bb_imgs.append(bb_img)
+
+    bb_accs = [a for a in range(1,11)]  # 加速度リストの作成
+    return bb_imgs, bb_accs
+
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -78,6 +95,9 @@ def main():
     vx,vy = +5,+5
     clock = pg.time.Clock()
     tmr = 0
+
+    bb_imgs,bb_accs = init_bb_imgs()  # タプルを取得
+    
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -99,12 +119,20 @@ def main():
         #     sum_mv[0] -= 5
         # if key_lst[pg.K_RIGHT]:
         #     sum_mv[0] += 5
+        bb_img = bb_imgs[min(tmr//500,9)]  # 段階に応じた大きさの変更
+        bb_rct.width = bb_img.get_rect().width
+        bb_rct.height = bb_img.get_rect().height
+
+        avx = vx*bb_accs[min(tmr//500,9)]  # 段階に応じた加速度の変更
+        avy = vy*bb_accs[min(tmr//500,9)]
+        bb_rct.move_ip(avx,avy)
+
         for k, tpl in DELTA.items():
             if key_lst[k]:
                 sum_mv[0]+= tpl[0]  # 横方向
                 sum_mv[1]+= tpl[1]  # 縦方向
         kk_rct.move_ip(sum_mv)
-        if check_bound(kk_rct) != (True,True):  # こうかとんがどこかがはみ出ている場合
+        if check_bound(kk_rct) != (True,True):  # こうかとんがどこかからはみ出ている場合
             kk_rct.move_ip(-sum_mv[0],-sum_mv[1])
         screen.blit(kk_img, kk_rct)
 
